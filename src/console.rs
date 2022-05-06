@@ -3,6 +3,14 @@ use core::fmt::Write;
 
 use crate::sbi::console_putchar;
 
+pub enum Logger {
+    ERROR = 31,
+    WARN = 93,
+    INFO = 34,
+    DEBUG = 32,
+    TRACE = 90,
+}
+
 struct Stdout;
 
 impl Write for Stdout {
@@ -31,3 +39,20 @@ macro_rules! println {
         $crate::console::print(format_args!(concat!($fmt, "\n") $(, $($arg)+)?));
     }
 }
+
+macro_rules! logger_template {
+    ($t:ident, $color: expr) => {
+        #[macro_export]
+        macro_rules! $t {
+            ($args:tt) => ({
+                $crate::console::print(format_args!("\x1b[{}m{}\x1b[0m\n", $color as u8, format_args!($args)));
+            })
+        }
+    }
+}
+
+logger_template!(info, console::Logger::INFO);
+logger_template!(warn, console::Logger::WARN);
+logger_template!(debug, console::Logger::DEBUG);
+logger_template!(trace, console::Logger::TRACE);
+logger_template!(error, console::Logger::ERROR);

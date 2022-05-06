@@ -15,6 +15,11 @@ global_asm!(include_str!("entry.asm"));
 pub fn rust_main() -> ! {
     clear_bss();
     println!("hello world");
+    info!("hi world");
+    trace!("hi world");
+    error!("hi world");
+    debug!("hi world");
+    warn!("hi world");
     loop {}
 }
 
