@@ -45,7 +45,7 @@ macro_rules! logger_template {
         #[macro_export]
         macro_rules! $t {
             ($args:tt) => ({
-                $crate::console::print(format_args!("\x1b[{}m{}\x1b[0m\n", $color as u8, format_args!($args)));
+                $crate::console::print(format_args!("\x1b[{}m[{}]: {}\x1b[0m\n", $color as u8, stringify!($t), format_args!($args)));
             })
         }
     }
