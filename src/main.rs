@@ -16,11 +16,11 @@ pub fn rust_main() -> ! {
     clear_bss();
     extern "C" {
         fn stext();
+        fn etext();
         fn sdata();
+        fn edata();
         fn srodata();
         fn erodata();
-        fn etext();
-        fn edata();
     }
     info!(".text [{:#x}, {:#x})", stext as usize, etext as usize);
     debug!(".rodata [{:#x}, {:#x})", srodata as usize, erodata as usize);
