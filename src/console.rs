@@ -40,19 +40,33 @@ macro_rules! println {
     }
 }
 
-macro_rules! logger_template {
-    ($t:ident, $color: expr) => {
-        #[macro_export]
-        macro_rules! $t {
-            ($args:tt) => ({
-                $crate::console::print(format_args!("\x1b[{}m[{}]: {}\x1b[0m\n", $color as u8, stringify!($t), format_args!($args)));
-            })
-        }
+#[macro_export]
+macro_rules! info {
+    ($($arg:tt)*) => {
+       println!("\x1b[{}m[INFO]: {}\x1b[0m\n", console::Logger::INFO as u8, format_args!($($arg)*));
     }
 }
-
-logger_template!(info, console::Logger::INFO);
-logger_template!(warn, console::Logger::WARN);
-logger_template!(debug, console::Logger::DEBUG);
-logger_template!(trace, console::Logger::TRACE);
-logger_template!(error, console::Logger::ERROR);
+#[macro_export]
+macro_rules! debug {
+    ($($arg: tt)*) => {
+       println!("\x1b[{}m[DEBUG]: {}\x1b[0m\n", console::Logger::DEBUG as u8, format_args!($($arg)*));
+    }
+}
+#[macro_export]
+macro_rules! error {
+    ($($arg: tt)*) => {
+       println!("\x1b[{}m[ERROR]: {}\x1b[0m\n", console::Logger::ERROR as u8, format_args!($($arg)*));
+    }
+}
+#[macro_export]
+macro_rules! trace {
+    ($($arg: tt)*) => {
+       println!("\x1b[{}m[TRACE]: {}\x1b[0m\n", console::Logger::TRACE as u8, format_args!($($arg)*));
+    }
+}
+#[macro_export]
+macro_rules! warn {
+    ($($arg: tt)*) => {
+       println!("\x1b[{}m[WARN]: {}\x1b[0m\n", console::Logger::WARN as u8, format_args!($($arg)*));
+    }
+}

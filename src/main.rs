@@ -14,12 +14,17 @@ global_asm!(include_str!("entry.asm"));
 #[no_mangle]
 pub fn rust_main() -> ! {
     clear_bss();
-    println!("hello world");
-    info!("hi world");
-    trace!("hi world");
-    error!("hi world");
-    debug!("hi world");
-    warn!("hi world");
+    extern "C" {
+        fn stext();
+        fn sdata();
+        fn srodata();
+        fn erodata();
+        fn etext();
+        fn edata();
+    }
+    info!(".text [{:#x}, {:#x})", stext as usize, etext as usize);
+    debug!(".rodata [{:#x}, {:#x})", srodata as usize, erodata as usize);
+    error!(".data [{:#x}, {:#x})", sdata as usize, edata as usize);
     loop {}
 }
 
