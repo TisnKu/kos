@@ -1,9 +1,11 @@
 use core::fmt;
-use core::fmt::Write;
+use core::fmt::{Arguments, Write};
+
+use log::{Level, LevelFilter, Log, Metadata, Record};
 
 use crate::sbi::console_putchar;
 
-pub enum Logger {
+pub enum LogColor {
     ERROR = 31,
     WARN = 93,
     INFO = 34,
@@ -14,7 +16,7 @@ pub enum Logger {
 struct Stdout;
 
 impl Write for Stdout {
-    fn write_str(&mut self, s: &str) -> core::fmt::Result {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
         for c in s.chars() {
             console_putchar(c as u8);
         }
@@ -41,32 +43,52 @@ macro_rules! println {
 }
 
 #[macro_export]
-macro_rules! info {
-    ($($arg:tt)*) => {
-       println!("\x1b[{}m[INFO]: {}\x1b[0m\n", console::Logger::INFO as u8, format_args!($($arg)*));
+macro_rules! with_color {
+    ($args:ident, $color:ident) => {
+       format_args!("\x1b[{}m{}\x1b[0m\n", $color as u8, $args)
     }
 }
-#[macro_export]
-macro_rules! debug {
-    ($($arg: tt)*) => {
-       println!("\x1b[{}m[DEBUG]: {}\x1b[0m\n", console::Logger::DEBUG as u8, format_args!($($arg)*));
+
+pub fn init_logger() {
+    static LOGGER: SimpleLogger = SimpleLogger;
+    log::set_logger(&LOGGER).unwrap();
+    log::set_max_level(match option_env!("LOG") {
+        Some("error") => LevelFilter::Error,
+        Some("warn") => LevelFilter::Warn,
+        Some("info") => LevelFilter::Info,
+        Some("debug") => LevelFilter::Debug,
+        Some("trace") => LevelFilter::Trace,
+        _ => LevelFilter::Off,
+    });
+}
+
+fn get_color(log_level: Level) -> LogColor {
+    match log_level {
+        Level::Error => LogColor::ERROR,
+        Level::Warn => LogColor::WARN,
+        Level::Info => LogColor::INFO,
+        Level::Debug => LogColor::DEBUG,
+        Level::Trace => LogColor::TRACE,
     }
 }
-#[macro_export]
-macro_rules! error {
-    ($($arg: tt)*) => {
-       println!("\x1b[{}m[ERROR]: {}\x1b[0m\n", console::Logger::ERROR as u8, format_args!($($arg)*));
-    }
+
+fn print_with_color(args: Arguments, color: LogColor) {
+    Stdout.write_fmt(with_color!(args, color)).unwrap();
 }
-#[macro_export]
-macro_rules! trace {
-    ($($arg: tt)*) => {
-       println!("\x1b[{}m[TRACE]: {}\x1b[0m\n", console::Logger::TRACE as u8, format_args!($($arg)*));
+
+struct SimpleLogger;
+
+impl Log for SimpleLogger {
+    fn enabled(&self, _metadata: &Metadata) -> bool {
+        true
     }
-}
-#[macro_export]
-macro_rules! warn {
-    ($($arg: tt)*) => {
-       println!("\x1b[{}m[WARN]: {}\x1b[0m\n", console::Logger::WARN as u8, format_args!($($arg)*));
+
+    fn log(&self, record: &Record) {
+        println!("hello world");
+        print_with_color(
+            format_args!("[{:>5}]: {}", record.level(), record.args()),
+            get_color(record.level()));
     }
+
+    fn flush(&self) {}
 }

@@ -2,18 +2,23 @@
 #![no_main]
 #![feature(panic_info_message)]
 
+use core::arch::global_asm;
+
+use log::{debug, error, info};
+
+use crate::console::{init_logger};
+
 mod lang_items;
 mod sbi;
 #[macro_use]
 mod console;
-
-use core::arch::global_asm;
 
 global_asm!(include_str!("entry.asm"));
 
 #[no_mangle]
 pub fn rust_main() -> ! {
     clear_bss();
+    init_logger();
     extern "C" {
         fn stext();
         fn etext();
