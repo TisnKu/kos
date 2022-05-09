@@ -6,7 +6,7 @@ use core::arch::global_asm;
 
 use log::{debug, error, info};
 
-use crate::console::{init_logger};
+use crate::console::init_logger;
 
 mod lang_items;
 mod sbi;
