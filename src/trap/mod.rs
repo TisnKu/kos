@@ -1,6 +1,6 @@
 mod context;
 
-use crate::batch::run_next_app; // why?
+use crate::batch::run_next_app;
 use crate::syscall::syscall;
 use core::arch::global_asm;
 use riscv::register::{

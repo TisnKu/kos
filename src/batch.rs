@@ -57,7 +57,7 @@ impl AppManager {
         println!("[kernel] num_app = {}", self.num_app);
         for i in 0..self.num_app {
             println!(
-                "[kernel] app_{} [{:#x}, {:#x}",
+                "[kernel] app_{} [{:#x}, {:#x}]",
                 i,
                 self.app_start[i],
                 self.app_start[i + 1]
@@ -97,8 +97,8 @@ lazy_static! {
         let num_app_ptr = _num_app as usize as *const usize;
         let num_app = num_app_ptr.read_volatile();
         let mut app_start: [usize; MAX_APP_NUM + 1] = [0; MAX_APP_NUM + 1];
-        let app_start_raw: &[usize] = core::slice::from_raw_parts(num_app_ptr.add(1), num_app); // readonly app starts here
-        app_start[..num_app].copy_from_slice(app_start_raw);
+        let app_start_raw: &[usize] = core::slice::from_raw_parts(num_app_ptr.add(1), num_app + 1); // readonly app starts here
+        app_start[..=num_app].copy_from_slice(app_start_raw);
         AppManager {
             num_app,
             current_app: 0,
@@ -110,6 +110,8 @@ lazy_static! {
 pub fn start() {
     println!("Batch start");
     print_app_info();
+    println!("Start running apps...");
+    run_next_app();
 }
 
 pub fn print_app_info() {
