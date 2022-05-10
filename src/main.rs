@@ -3,17 +3,18 @@
 #![feature(panic_info_message)]
 
 use core::arch::global_asm;
-
 use log::{debug, error, info};
-
 use crate::console::init_logger;
 
 mod lang_items;
 mod sbi;
 #[macro_use]
 mod console;
+mod batch;
+mod trap;
 
 global_asm!(include_str!("entry.asm"));
+global_asm!(include_str!("link_app.S"));
 
 #[no_mangle]
 pub fn rust_main() -> ! {
@@ -30,6 +31,10 @@ pub fn rust_main() -> ! {
     info!(".text [{:#x}, {:#x})", stext as usize, etext as usize);
     debug!(".rodata [{:#x}, {:#x})", srodata as usize, erodata as usize);
     error!(".data [{:#x}, {:#x})", sdata as usize, edata as usize);
+
+    println!("[kernel] hello world");
+    trap::init();
+    batch::start();
     loop {}
 }
 
@@ -38,7 +43,7 @@ fn clear_bss() {
         fn sbss();
         fn ebss();
     }
-    (sbss as usize..ebss as usize).for_each(|a| {
-        unsafe { (a as *mut u8).write_volatile(0) }
-    });
+    unsafe {
+        core::slice::from_raw_parts_mut(sbss as usize as *mut u8, ebss as usize - sbss as usize).fill(0);
+    }
 }
