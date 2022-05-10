@@ -120,12 +120,14 @@ pub fn print_app_info() {
 
 pub fn run_next_app() -> ! {
     println!("[Kernel] Start running next app...");
-    let mut app_manager = APP_MANAGER.lock();
-    let current_app = app_manager.get_current_app();
-    unsafe {
-        app_manager.load_app(current_app);
+    {
+        let mut app_manager = APP_MANAGER.lock();
+        let current_app = app_manager.get_current_app();
+        unsafe {
+            app_manager.load_app(current_app);
+        }
+        app_manager.move_to_next_app();
     }
-    app_manager.move_to_next_app();
     extern "C" {
         fn __restore(cx_addr: usize);
     }
